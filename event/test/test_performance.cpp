@@ -21,7 +21,7 @@
 using namespace std;
 using namespace backtrace;
 
-typedef SpecifiedEvent<> SimpleEvent;
+typedef NativeEvent<> SimpleEvent;
 
 int main()
 {

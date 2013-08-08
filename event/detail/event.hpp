@@ -21,8 +21,33 @@
 #include <string>
 #include <functional>
 #include <exception>
- 
+#include <tuple>
+
 namespace backtrace {
+
+// N is the amount of params.
+template<size_t N>
+struct TupleExpanderForNative
+{
+    template<typename Functor, typename Tuple, typename...Args>
+    static void expandTuple(Functor& functor, Tuple& tuple, Args...expanded)
+    {
+        TupleExpanderForNative<N - 1>::template expandTuple<Functor, Tuple>(
+            functor, tuple, std::get<N - 1>(tuple), std::forward<Args>(expanded)...
+            // N - 1 because of index's shifting.
+        );
+    }
+};
+
+template<>
+struct TupleExpanderForNative<0>
+{
+    template<typename Functor, typename Tuple, typename...Args>
+    static void expandTuple(Functor& functor, Tuple& tuple, Args...expanded)
+    {
+        functor(std::forward<Args>(expanded)...);
+    }
+};
 
 class EventTarget;
 
@@ -74,18 +99,19 @@ protected:
     std::vector<std::function<void(Event*)>> m_callbacks;
 };
 
-template<typename...Args>
+template<typename TupleExpander, typename...Args>
 class SpecifiedEvent : public Event
 {
-    friend class EventListener;
     typedef std::function<void(Event*, Args...)> HandlerType;
+    typedef std::tuple<Event*, Args...> ArgPack;
+
+protected:
+    ArgPack mArgPack;
 
 public:
-    SpecifiedEvent(std::string type, EventTarget* target,
-        Args...args)
+    SpecifiedEvent(std::string type, EventTarget* target, Args...args)
         : Event(std::move(type), target),
-        m_invoker(std::bind(&SpecifiedEvent::_invoke, this,
-            std::placeholders::_1, args...))
+        mArgPack(this, std::move(args)...)
     {
     }
 
@@ -93,6 +119,8 @@ public:
 
     class Listener : public EventListener
     {
+        friend class SpecifiedEvent;
+
     public:
         Listener(HandlerType handler)
             : m_handler(std::move(handler))
@@ -101,29 +129,31 @@ public:
 
         virtual ~Listener() {}
 
-        virtual void handleEvent(Event* event)
+        virtual void handleEvent(Event* evt)
         {
-            typedef SpecifiedEvent<Args...> RealEvent;
-            // Just for performance reason that I don't use dynamic_cast.
-            // Take care of yourself.
-            RealEvent* p = static_cast<RealEvent*>(event);
-            p->m_invoker(m_handler);
+            auto p = static_cast<SpecifiedEvent*>(evt);
+            TupleExpander::template expandTuple<HandlerType, ArgPack>(
+                m_handler, p->mArgPack
+            );
         }
 
     protected:
         HandlerType m_handler;
     };
-
-protected:
-    // TO-DO: Reduce this indirectional callling layer.
-    void _invoke(const HandlerType& handler, Args...args)
-    {
-        // Call event handler. ##Callback(Event*, Args...);
-        handler(this, args...);
-    }
-
-    std::function<void(const HandlerType&)> m_invoker;
 };
+
+template<typename...Args>
+class NativeEvent : public SpecifiedEvent<TupleExpanderForNative<sizeof...(Args) + 1>, Args...>
+{ // The "+ 1" above is for the "Event*" param.
+     typedef SpecifiedEvent<TupleExpanderForNative<sizeof...(Args) + 1>, Args...> MyBase;
+public:
+    NativeEvent(std::string type, EventTarget* target, Args...args)
+        : MyBase(std::move(type), target, std::forward<Args>(args)...)
+    {
+    }
+};
+
+// TO-DO: Event interface for script programming.
 
 } // namespace backtrace
 

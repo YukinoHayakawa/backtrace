@@ -23,7 +23,7 @@
 using namespace std;
 using namespace backtrace;
 
-typedef SpecifiedEvent<std::string> SimpleEvent;
+typedef NativeEvent<std::string, int> SimpleEvent;
 
 int main()
 {
@@ -66,9 +66,10 @@ int main()
      *
      */
 
-    auto callback = [&mapping](Event* evt, std::string name)
+    auto callback = [&mapping](Event* evt, std::string name, int checksum)
     {
         cout << name << "\n";
+        cout << "checksum " << checksum << "\n";
         cout << "type " << evt->type << "\n";
         cout << "target " << evt->target << "\n";
         cout << "currentTarget " << mapping[evt->currentTarget] << "\n";
@@ -77,14 +78,14 @@ int main()
         cout << "\n";
     };
 
-    auto callback2 = [](Event* evt, std::string)
+    auto callback2 = [](Event* evt, std::string, int)
     {
         evt->cancel();
     };
 
     root->addEventListener<SimpleEvent::Listener>("unknown", callback);
     node1->addEventListener<SimpleEvent::Listener>("unknown", callback);
-    node1->addEventListener<SimpleEvent::Listener>("unknown", [node1](Event*, std::string) {
+    node1->addEventListener<SimpleEvent::Listener>("unknown", [node1](Event*, std::string, int) {
         node1->iterateChildren([](EventTarget* t) { cout << "child " << t << "\n"; });
     });
     node2->addEventListener<SimpleEvent::Listener>("unknown", callback);
@@ -98,7 +99,7 @@ int main()
 
     node6->addEventListener<SimpleEvent::Listener>("unknown", callback);
 
-    auto evt1 = dispatcher.createEvent<SimpleEvent>("unknown", node1, "evt1");
+    auto evt1 = dispatcher.createEvent<SimpleEvent>("unknown", node1, "evt1", 500);
 
     evt1->addCallback([&mapping](Event*) {
         for(auto i = mapping.begin(); i != mapping.end(); ++i)
@@ -113,5 +114,5 @@ int main()
 
     node5->addEventListener<SimpleEvent::Listener>("unknown", callback2);
 
-    dispatcher.postEvent<SimpleEvent>("unknown", root, "evt2");
+    dispatcher.postEvent<SimpleEvent>("unknown", root, "evt2", 500);
 }
