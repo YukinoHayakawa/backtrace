@@ -54,7 +54,7 @@ public:
     template<typename T, typename...Args>
     ListenerId addEventListener(const std::string& type, Args...args)
     {
-        auto naked = m_listenerFactory.produce<T>(std::move(args)...);
+        auto naked = m_listenerFactory.produce<T>(std::forward<Args>(args)...);
 
         std::lock_guard<std::mutex> lock(m_handlerMutex);
         m_handlers.insert(std::make_pair(type, naked));

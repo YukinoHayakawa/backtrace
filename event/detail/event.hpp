@@ -119,8 +119,6 @@ public:
 
     class Listener : public EventListener
     {
-        friend class SpecifiedEvent;
-
     public:
         Listener(HandlerType handler)
             : m_handler(std::move(handler))

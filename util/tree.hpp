@@ -181,13 +181,13 @@ public:
     void resetRoot(Args...args)
     {
         m_nodeFactory.recycle(m_root);
-        m_root = createNode<P>(std::move(args)...);
+        m_root = createNode<P>(std::forward<Args>(args)...);
     }
 
     template<typename P, typename...Args>
     Node* createNode(Args...args)
     {
-        P* newData = m_dataFactory.template produce<P>(std::move(args)...);
+        P* newData = m_dataFactory.template produce<P>(std::forward<Args>(args)...);
         return m_nodeFactory.template produce<Node>(newData, nullptr, this);
     }
 

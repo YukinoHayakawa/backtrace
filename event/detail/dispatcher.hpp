@@ -42,7 +42,7 @@ public:
     template<typename T, typename...Args>
     void postEvent(Args...args)
     {
-        postEvent(createEvent<T>(std::move(args)...));
+        postEvent(createEvent<T>(std::forward<Args>(args)...));
     }
 
     void postEvent(Event* evt)
@@ -59,7 +59,7 @@ public:
     template<typename T, typename...Args>
     Event* createEvent(Args...args)
     {
-        return m_evtFactory.produce<T>(std::move(args)...);
+        return m_evtFactory.produce<T>(std::forward<Args>(args)...);
     }
 
 protected:

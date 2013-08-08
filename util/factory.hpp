@@ -63,7 +63,7 @@ public:
     template<typename P, typename...Args>
     P* produce(Args...args)
     {
-        P* naked = new P(std::move(args)...);
+        P* naked = new P(std::forward<Args>(args)...);
         std::unique_ptr<T> pack(naked);
 
         std::lock_guard<std::mutex> lock(m_mutex);
