@@ -57,6 +57,8 @@ public:
         Ray ray;
         double zw = 100.0;
         double x, y;
+        int samples = 16;
+        int sampleSqrt = static_cast<int>(sqrt(samples));
 
         ray.direction = Vector3d(0.0, 0.0, -1.0);
 
@@ -64,10 +66,20 @@ public:
         {
             for(int c = 0; c < renderTarget->getWidth(); ++c)
             {
-                x = pixelSize * (c - 0.5 * (renderTarget->getWidth() - 1.0));
-                y = pixelSize * (r - 0.5 * (renderTarget->getHeight() - 1.0));
-                ray.origin = Point3d(x, y, zw);
-                pixelColor = rayTracer->traceRay(sceneManager.get(), ray);
+                pixelColor = RGBColor();
+
+                for(int vertical = 0; vertical < sampleSqrt; ++vertical)
+                {
+                    for(int horizontal = 0; horizontal < sampleSqrt; ++horizontal)
+                    {
+                        x = pixelSize * (c - 0.5 * renderTarget->getWidth() + (horizontal + 0.5) / sampleSqrt);
+                        y = pixelSize * (r - 0.5 * renderTarget->getHeight() + (vertical + 0.5) / sampleSqrt);
+                        ray.origin = Point3d(x, y, zw);
+                        pixelColor += rayTracer->traceRay(sceneManager.get(), ray);
+                    }
+                }
+
+                pixelColor /= samples;
                 renderTarget->drawPixel(c, r, pixelColor);
             }
         }
