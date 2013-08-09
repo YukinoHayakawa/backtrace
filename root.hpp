@@ -51,7 +51,7 @@ public:
 
     virtual ~Root() {}
 
-    virtual void renderScene()
+    virtual void renderSceneOrthographic()
     {
         RGBColor pixelColor;
         Ray ray;
@@ -75,6 +75,42 @@ public:
                         x = pixelSize * (c - 0.5 * renderTarget->getWidth() + (horizontal + 0.5) / sampleSqrt);
                         y = pixelSize * (r - 0.5 * renderTarget->getHeight() + (vertical + 0.5) / sampleSqrt);
                         ray.origin = Point3d(x, y, zw);
+                        pixelColor += rayTracer->traceRay(sceneManager.get(), ray);
+                    }
+                }
+
+                pixelColor /= samples;
+                renderTarget->drawPixel(c, r, pixelColor);
+            }
+        }
+    }
+
+    virtual void renderScenePerspective()
+    {
+        RGBColor pixelColor;
+        Ray ray;
+        double zw = 100.0;
+        double x, y;
+        int samples = 16;
+        int sampleSqrt = static_cast<int>(sqrt(samples));
+        double viewPlaneDistance = 100.0;
+
+        ray.origin = Vector3d(0.0, 0.0, zw);
+
+        for(int r = 0; r < renderTarget->getHeight(); ++r)
+        {
+            for(int c = 0; c < renderTarget->getWidth(); ++c)
+            {
+                pixelColor = RGBColor();
+
+                for(int vertical = 0; vertical < sampleSqrt; ++vertical)
+                {
+                    for(int horizontal = 0; horizontal < sampleSqrt; ++horizontal)
+                    {
+                        x = pixelSize * (c - 0.5 * renderTarget->getWidth() + (horizontal + 0.5) / sampleSqrt);
+                        y = pixelSize * (r - 0.5 * renderTarget->getHeight() + (vertical + 0.5) / sampleSqrt);
+                        ray.direction = Point3d(x, y, -viewPlaneDistance);
+                        ray.direction.normalize();
                         pixelColor += rayTracer->traceRay(sceneManager.get(), ray);
                     }
                 }
