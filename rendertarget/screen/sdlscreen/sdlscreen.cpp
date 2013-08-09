@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include <cmath>
+
 #if defined(_MSC_VER)
 #include "SDL.h"
 #else
@@ -24,54 +26,70 @@
 
 namespace backtrace {
 
-    SDLScreen::SDLScreen(uint32_t width, uint32_t height, uint8_t bitDepth, bool fullscreen)
-        : Screen(width, height, bitDepth),
-        mFullscreen(fullscreen)
+SDLScreen::SDLScreen(uint32_t width, uint32_t height, uint8_t bitDepth, bool fullscreen)
+    : Screen(width, height, bitDepth),
+    mFullscreen(fullscreen)
+{
+    // Initialize SDL's subsystems - in this case, only video.
+    if(SDL_Init(SDL_INIT_VIDEO) < 0) 
     {
-        // Initialize SDL's subsystems - in this case, only video.
-        if(SDL_Init(SDL_INIT_VIDEO) < 0) 
-        {
-            //throw std::runtime_error("Unable to init SDL: " + SDL_GetError());
-            fprintf(stderr, "Unable to init SDL: %s\n", SDL_GetError());
-            throw 0;
-        }
-
-        // Attempt to create a window with pixels under specific mode.
-        mScreen = SDL_SetVideoMode(width, height, bitDepth,
-            fullscreen ? (SDL_HWSURFACE | SDL_FULLSCREEN) : SDL_HWSURFACE);
-
-        // If we fail, return error.
-        if(mScreen == NULL) 
-        {
-            //throw std::runtime_error()
-            fprintf(stderr, "Unable to set video: %s\n", SDL_GetError());
-            exit(1);
-        }
+        //throw std::runtime_error("Unable to init SDL: " + SDL_GetError());
+        fprintf(stderr, "Unable to init SDL: %s\n", SDL_GetError());
+        throw 0;
     }
 
-    SDLScreen::~SDLScreen()
-    {
-        // Register SDL_Quit to be called at exit; makes sure things are
-        // cleaned up when we quit.
-        SDL_Quit();
-    }
+    // Attempt to create a window with pixels under specific mode.
+    mScreen = SDL_SetVideoMode(width, height, bitDepth,
+        fullscreen ? (SDL_HWSURFACE | SDL_FULLSCREEN) : SDL_HWSURFACE);
 
-    void SDLScreen::drawPixel(uint32_t x, uint32_t y, uint32_t color)
+    // If we fail, return error.
+    if(mScreen == NULL) 
     {
-        unsigned int *ptr = (unsigned int*)mScreen->pixels;
-        int lineoffset = y * (mScreen->pitch / 4);
-        ptr[lineoffset + x] = color;
+        //throw std::runtime_error()
+        fprintf(stderr, "Unable to set video: %s\n", SDL_GetError());
+        exit(1);
     }
+}
 
-    void SDLScreen::drawPixel(uint32_t x, uint32_t y, uint8_t r, uint8_t g, uint8_t b)
-    {
-        drawPixel(x, y, SDL_MapRGB(mScreen->format, r, g, b));
-    }
+SDLScreen::~SDLScreen()
+{
+    // Register SDL_Quit to be called at exit; makes sure things are
+    // cleaned up when we quit.
+    SDL_Quit();
+}
 
-    void SDLScreen::update(uint32_t x, uint32_t y, uint32_t width, uint32_t height)
+void SDLScreen::drawPixel(uint32_t x, uint32_t y, uint32_t color)
+{
+    unsigned int *ptr = (unsigned int*)mScreen->pixels;
+    int lineoffset = y * (mScreen->pitch / 4);
+    ptr[lineoffset + x] = color;
+}
+
+void SDLScreen::drawPixel(uint32_t x, uint32_t y, uint8_t r, uint8_t g, uint8_t b)
+{
+    drawPixel(x, y, SDL_MapRGB(mScreen->format, r, g, b));
+}
+
+void SDLScreen::drawPixel(uint32_t x, uint32_t y, const RGBColor& color)
+{
+    if(mGamma == 1.0)
     {
-        // Tell SDL to update the screen
-        SDL_UpdateRect(mScreen, x, y, width, height);
+        drawPixel(x, y, color.r * 255, color.g * 255, color.b * 255);
     }
+    else
+    {
+        drawPixel(x, y,
+            pow(color.r, mInvGamma) * 255,
+            pow(color.g, mInvGamma) * 255,
+            pow(color.b, mInvGamma) * 255
+        );
+    }
+}
+
+void SDLScreen::update(uint32_t x, uint32_t y, uint32_t width, uint32_t height)
+{
+    // Tell SDL to update the screen
+    SDL_UpdateRect(mScreen, x, y, width, height);
+}
 
 }

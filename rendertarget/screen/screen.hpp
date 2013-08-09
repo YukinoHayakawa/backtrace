@@ -23,9 +23,6 @@ namespace backtrace {
 
 class Screen : public RenderTarget
 {
-protected:
-    
-
 public:
     Screen(uint32_t width, uint32_t height, uint8_t bitDepth)
         : RenderTarget(width, height, bitDepth)

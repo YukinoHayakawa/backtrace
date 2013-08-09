@@ -39,7 +39,8 @@ public:
 
     virtual void drawPixel(uint32_t x, uint32_t y, uint32_t color);
     virtual void drawPixel(uint32_t x, uint32_t y, uint8_t r, uint8_t g, uint8_t b);
-
+    virtual void drawPixel(uint32_t x, uint32_t y, const RGBColor& color);
+    
     virtual void update(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
 };
 

@@ -17,6 +17,8 @@
 #ifndef BACKTRACE_RENDERTARGETBASE_HPP
 #define BACKTRACE_RENDERTARGETBASE_HPP
 
+#include "../util/rgbcolor.hpp"
+
 namespace backtrace {
 
 class RenderTarget
@@ -43,7 +45,8 @@ public:
 
     virtual void drawPixel(uint32_t x, uint32_t y, uint32_t color) = 0;
     virtual void drawPixel(uint32_t x, uint32_t y, uint8_t r, uint8_t g, uint8_t b) = 0;
-
+    virtual void drawPixel(uint32_t x, uint32_t y, const RGBColor& color) = 0;
+    
     void setGamma(float gamma)
     {
         mGamma = gamma;
