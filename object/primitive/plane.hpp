@@ -25,34 +25,34 @@ class Plane : public GeometricObject
 {
 public:
     Plane()
-        : m_normal(0.0, 1.0, 0.0)
+        : mNormal(0.0, 1.0, 0.0)
     {
     }
 
     Plane(const Point3d& point, const Normald& normal)
-        : m_point(point),
-        m_normal(normal)
+        : mPoint(point),
+        mNormal(normal)
     {
-        m_normal.normalize();
+        mNormal.normalize();
     }
     
     virtual ~Plane() {}
     
     virtual bool hit(const Ray& ray, double& tmin, ShadeRecord& result) const;
 
-protected:
-    Point3d m_point;
-    Normald m_normal;
+public:
+    Point3d mPoint;
+    Normald mNormal;
 };
 
 bool Plane::hit(const Ray& ray, double& tmin, ShadeRecord& result) const
 {
-    double t = (m_point - ray.origin) * m_normal / (ray.direction * m_normal);
+    double t = (mPoint - ray.origin) * mNormal / (ray.direction * mNormal);
 
     if(t > kEpsilon)
     {
         tmin = t;
-        result.normal = m_normal;
+        result.normal = mNormal;
         result.localHitPoint = ray.origin + t * ray.direction;
         return true;
     }

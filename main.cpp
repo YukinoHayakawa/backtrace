@@ -36,7 +36,12 @@ int main()
 
     auto sphere = root.sceneManager->addObject<Sphere>();
     sphere->setColor(RGBColor(1, 0, 0));
+    sphere->mCenter = (0, 0.5, 0);
 
+    sphere = root.sceneManager->addObject<Sphere>();
+    sphere->setColor(RGBColor(1, 1, 0));
+    sphere->mCenter = (0, 0, 0.5);
+    
     root.renderScene();
 
     root.renderTarget->update();

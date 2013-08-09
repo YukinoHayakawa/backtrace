@@ -25,13 +25,13 @@ class Sphere : public GeometricObject
 {
 public:
     Sphere()
-        : m_radius(1.0)
+        : mRadius(1.0)
     {
     }
 
     Sphere(const Point3d& center, double radius)
-        : m_center(center),
-        m_radius(radius)
+        : mCenter(center),
+        mRadius(radius)
     {
     }
 
@@ -39,18 +39,18 @@ public:
 
     virtual bool hit(const Ray& ray, double& tmin, ShadeRecord& result) const;
 
-private:
-    Point3d m_center;
-    double m_radius;
+public:
+    Point3d mCenter;
+    double mRadius;
 };
 
 bool Sphere::hit(const Ray& ray, double& tmin, ShadeRecord& result) const
 {
     double      t;
-    Vector3d    temp    = ray.origin - m_center;
+    Vector3d    temp    = ray.origin - mCenter;
     double      a       = ray.direction * ray.direction;
     double      b       = 2.0 * temp * ray.direction;
-    double      c       = temp * temp - m_radius * m_radius;
+    double      c       = temp * temp - mRadius * mRadius;
     double      disc    = b * b - 4.0 * a * c;
     
     if (disc < 0.0)
@@ -66,7 +66,7 @@ bool Sphere::hit(const Ray& ray, double& tmin, ShadeRecord& result) const
         if (t > kEpsilon)
         {
             tmin = t;
-            result.normal = (temp + t * ray.direction) / m_radius;
+            result.normal = (temp + t * ray.direction) / mRadius;
             result.localHitPoint = ray.origin + t * ray.direction;
             return true;
         } 
@@ -76,7 +76,7 @@ bool Sphere::hit(const Ray& ray, double& tmin, ShadeRecord& result) const
         if (t > kEpsilon)
         {
             tmin = t;
-            result.normal = (temp + t * ray.direction) / m_radius;
+            result.normal = (temp + t * ray.direction) / mRadius;
             result.localHitPoint = ray.origin + t * ray.direction;
             return true;
         } 
