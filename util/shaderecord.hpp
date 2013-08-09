@@ -28,11 +28,9 @@ struct ShadeRecord
     Point3d localHitPoint;
     Normald normal;
     RGBColor color;
-    class SceneManager* world;
 
-    ShadeRecord(SceneManager* world)
-        : hitAnObject(false),
-        world(world)
+    ShadeRecord()
+        : hitAnObject(false)
     {
     }
 

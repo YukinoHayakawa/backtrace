@@ -14,23 +14,26 @@
  * limitations under the License.
  */
 
-#ifndef BACKTRACE_RAYTRACERBASE_H
-#define BACKTRACE_RAYTRACERBASE_H
+#ifndef BACKTRACE_RAYTRACER_SIMPLE_H
+#define BACKTRACE_RAYTRACER_SIMPLE_H
 
-#include "../util/ray.hpp"
-#include "../util/rgbcolor.hpp"
-#include "../scenemanager/scenemanager.hpp"
+#include "raytracer.hpp"
  
 namespace backtrace {
 
-class RayTracer
+class SimpleRayTracer : public RayTracer
 {
 public:
-    virtual ~RayTracer() {}
+    virtual ~SimpleRayTracer() {}
 
     virtual RGBColor traceRay(SceneManager* sm, const Ray& ray)
     {
-        return RGBColor();
+        ShadeRecord rec;
+
+        if(sm->hitObject(ray, rec))
+            return rec.color;
+        else
+            return RGBColor();
     }
 };
 

@@ -29,20 +29,20 @@ public:
     {
     }
 
-    Plane(const Point3d& point, const Normal& normal)
+    Plane(const Point3d& point, const Normald& normal)
         : m_point(point),
         m_normal(normal)
     {
-        n.normalize();
+        m_normal.normalize();
     }
     
     virtual ~Plane() {}
     
     virtual bool hit(const Ray& ray, double& tmin, ShadeRecord& result) const;
 
-private:
+protected:
     Point3d m_point;
-    Normal m_normal;
+    Normald m_normal;
 };
 
 bool Plane::hit(const Ray& ray, double& tmin, ShadeRecord& result) const

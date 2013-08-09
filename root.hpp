@@ -67,8 +67,8 @@ public:
                 x = pixelSize * (c - 0.5 * (renderTarget->getWidth() - 1.0));
                 y = pixelSize * (r - 0.5 * (renderTarget->getHeight() - 1.0));
                 ray.origin = Point3d(x, y, zw);
-                pixelColor = rayTracer->traceRay(sceneManager.get(), &ray);
-                renderTarget->drawPixel(c, r, pixelColor.r * 255, pixelColor.g * 255, pixelColor.b * 255);
+                pixelColor = rayTracer->traceRay(sceneManager.get(), ray);
+                renderTarget->drawPixel(c, r, pixelColor);
             }
         }
     }

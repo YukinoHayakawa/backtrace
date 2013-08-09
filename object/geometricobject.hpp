@@ -28,8 +28,18 @@ public:
     virtual ~GeometricObject() {};
     virtual bool hit(const Ray& ray, double& tmin, ShadeRecord& result) const {};
 
+    RGBColor getColor()
+    {
+        return mColor;
+    }
+
+    void setColor(const RGBColor& color)
+    {
+        mColor = color;
+    }
+
 protected:
-    RGBColor m_color;
+    RGBColor mColor;
 };
 
 }

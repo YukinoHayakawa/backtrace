@@ -21,30 +21,21 @@
 #include "scenemanager/scenemanager.hpp"
 #include "rendertarget/screen/sdlscreen/sdlscreen.hpp"
 #include "rendertarget/screen/sdlscreen/sdlscreen.cpp"
+#include "object/primitive/sphere.hpp"
+#include "object/primitive/plane.hpp"
+#include "raytracer/simple.hpp"
 
 using namespace backtrace;
-
-class SingleSphereTracer : public RayTracer
-{
-public:
-    virtual RGBColor traceRay(SceneManager* sm, Ray* ray)
-    {
-        ShadeRecord sr(sm);
-        double t;
-
-        if(sm->sphere.hit(*ray, t, sr))
-            return RGBColor(1, 1, 0);
-        else
-            return RGBColor();
-    }
-};
 
 int main()
 {
     Root root(new SceneManager(),
         new SDLScreen(640, 480, 32, false),
-        new SingleSphereTracer()
+        new SimpleRayTracer()
         );
+
+    auto sphere = root.sceneManager->addObject<Sphere>();
+    sphere->setColor(RGBColor(1, 0, 0));
 
     root.renderScene();
 

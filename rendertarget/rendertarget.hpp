@@ -29,6 +29,7 @@ protected:
     float mAspectRatio;
     float mGamma;
     float mInvGamma;
+    RGBColor mBackgroundColor;
 
 public:
     RenderTarget(uint32_t width, uint32_t height, uint8_t bitDepth)
@@ -46,7 +47,7 @@ public:
     virtual void drawPixel(uint32_t x, uint32_t y, uint32_t color) = 0;
     virtual void drawPixel(uint32_t x, uint32_t y, uint8_t r, uint8_t g, uint8_t b) = 0;
     virtual void drawPixel(uint32_t x, uint32_t y, const RGBColor& color) = 0;
-    
+
     void setGamma(float gamma)
     {
         mGamma = gamma;
@@ -73,6 +74,16 @@ public:
     void update()
     {
         update(0, 0, mWidth, mHeight);
+    }
+
+    RGBColor getBackgroundColor()
+    {
+        return mBackgroundColor;
+    }
+
+    void setBackgroundColor(const RGBColor& color)
+    {
+        mBackgroundColor = color;
     }
 };
 
