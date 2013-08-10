@@ -40,7 +40,7 @@ public:
     
     virtual bool hit(const Ray& ray, double& tmin, ShadeRecord& result) const;
 
-public:
+public: // TO-DO: Should be protected.
     Point3d mPoint;
     Normald mNormal;
 };

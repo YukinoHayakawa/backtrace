@@ -14,12 +14,37 @@
  * limitations under the License.
  */
 
-#ifndef BACKTRACE_MATH_HPP
-#define BACKTRACE_MATH_HPP
+#ifndef BACKTRACE_RANDOM_HPP
+#define BACKTRACE_RANDOM_HPP
 
-#include "detail/vector3.hpp"
-#include "detail/typedefs.hpp"
-#include "detail/constants.hpp"
-#include "detail/random.hpp"
+#include <cmath>
+
+namespace backtrace {
+
+uint32_t xor128(void) {
+  static uint32_t x = 123456789;
+  static uint32_t y = 362436069;
+  static uint32_t z = 521288629;
+  static uint32_t w = 88675123;
+  uint32_t t;
  
+  t = x ^ (x << 11);
+  x = y; y = z; z = w;
+  return w = w ^ (w >> 19) ^ (t ^ (t >> 8));
+}
+
+float randomFloat()
+{
+    return rand() / static_cast<float>(RAND_MAX);
+}
+
+struct SrandInit
+{
+    SrandInit() { srand((unsigned)time(0)); };
+};
+
+SrandInit __srandInit;
+
+}
+
 #endif

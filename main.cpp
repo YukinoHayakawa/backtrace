@@ -24,6 +24,7 @@
 #include "object/primitive/sphere.hpp"
 #include "object/primitive/plane.hpp"
 #include "raytracer/simple.hpp"
+#include "sampler/jittered.hpp"
 
 using namespace backtrace;
 
@@ -31,7 +32,8 @@ int main()
 {
     Root root(new SceneManager(),
         new SDLScreen(640, 480, 32, false),
-        new SimpleRayTracer()
+        new SimpleRayTracer(),
+        new JitteredSampler()
         );
 
     auto sphere = root.sceneManager->addObject<Sphere>();
@@ -41,8 +43,8 @@ int main()
     sphere = root.sceneManager->addObject<Sphere>();
     sphere->setColor(RGBColor(1, 1, 0));
     sphere->mCenter = (0, 0, 0.5);
-    
-    root.renderScenePerspective();
+
+    root.renderSceneOrthographic();
 
     root.renderTarget->update();
 

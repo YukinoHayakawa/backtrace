@@ -17,6 +17,8 @@
 #ifndef BACKTRACE_MATH_DETAIL_TYPEDEFS_H
 #define BACKTRACE_MATH_DETAIL_TYPEDEFS_H
 
+#include <utility>
+
 #include "vector3.hpp"
 
 namespace backtrace {
@@ -28,6 +30,8 @@ typedef Vector3f Normalf;
 typedef Vector3<double> Vector3d;
 typedef Vector3d Point3d;
 typedef Vector3d Normald;
+
+typedef std::pair<double, double> Point2d;
 
 }
 
