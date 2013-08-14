@@ -26,8 +26,8 @@
 
 namespace backtrace {
 
-SDLScreen::SDLScreen(uint32_t width, uint32_t height, uint8_t bitDepth, bool fullscreen)
-    : Screen(width, height, bitDepth),
+SDLScreen::SDLScreen(uint32_t width, uint32_t height, uint8_t colorDepth, float gamma, bool fullscreen)
+    : Screen(width, height, colorDepth, gamma),
     mFullscreen(fullscreen)
 {
     // Initialize SDL's subsystems - in this case, only video.
@@ -39,7 +39,7 @@ SDLScreen::SDLScreen(uint32_t width, uint32_t height, uint8_t bitDepth, bool ful
     }
 
     // Attempt to create a window with pixels under specific mode.
-    mScreen = SDL_SetVideoMode(width, height, bitDepth,
+    mScreen = SDL_SetVideoMode(width, height, colorDepth,
         fullscreen ? (SDL_HWSURFACE | SDL_FULLSCREEN) : SDL_HWSURFACE);
 
     // If we fail, return error.

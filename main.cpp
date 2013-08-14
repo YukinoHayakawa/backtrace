@@ -17,7 +17,7 @@
 #include <memory>
 #include <thread>
 
-#include "root.hpp"
+#include "engine.hpp"
 #include "scenemanager/scenemanager.hpp"
 #include "rendertarget/screen/sdlscreen/sdlscreen.hpp"
 #include "rendertarget/screen/sdlscreen/sdlscreen.cpp"
@@ -30,23 +30,24 @@ using namespace backtrace;
 
 int main()
 {
-    Root root(new SceneManager(),
-        new SDLScreen(640, 480, 32, false),
-        new SimpleRayTracer(),
-        new JitteredSampler()
-        );
+    SceneManager* sm = new SceneManager();
+    Screen* scr = new SDLScreen(640, 480, 32, 1.0, false);
+    RayTracer* tracer = new SimpleRayTracer();
+    Sampler* sampler = new JitteredSampler();
 
-    auto sphere = root.sceneManager->addObject<Sphere>();
+    Engine engine(sm, scr, tracer, sampler);
+
+    auto sphere = engine.sceneManager->addObject<Sphere>();
     sphere->setColor(RGBColor(1, 0, 0));
     sphere->mCenter = (0, 0.5, 0);
 
-    sphere = root.sceneManager->addObject<Sphere>();
+    sphere = engine.sceneManager->addObject<Sphere>();
     sphere->setColor(RGBColor(1, 1, 0));
     sphere->mCenter = (0, 0, 0.5);
 
-    root.renderSceneOrthographic();
+    engine.renderSceneOrthographic();
 
-    root.renderTarget->update();
+    scr->update();
 
     std::chrono::milliseconds dura(2000);
     std::this_thread::sleep_for(dura);

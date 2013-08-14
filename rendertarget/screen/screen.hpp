@@ -23,12 +23,39 @@ namespace backtrace {
 
 class Screen : public RenderTarget
 {
+protected:
+    float mAspectRatio;
+    float mGamma;
+    float mInvGamma;
+
 public:
-    Screen(uint32_t width, uint32_t height, uint8_t bitDepth)
-        : RenderTarget(width, height, bitDepth)
+    Screen(uint32_t width, uint32_t height, uint8_t colorDepth, float gamma = 1.0f)
+        : RenderTarget(width, height, colorDepth),
+        mAspectRatio(static_cast<float>(width) / static_cast<float>(height)),
+        mGamma(gamma),
+        mInvGamma(1.0 / gamma)
     {
     }
 
+    void setGamma(float gamma)
+    {
+        mGamma = gamma;
+        mInvGamma = 1.0f / gamma;
+    }
+
+    float getGamma() { return mGamma; }
+    float getInvGamma() { return mInvGamma; }
+
+    float getAspectRatio() { return mAspectRatio; }
+    // void setAspectRatio(float ratio) { mAspectRatio = ratio; }
+
+    virtual void update(uint32_t x, uint32_t y, uint32_t width, uint32_t height) {}
+
+    void update()
+    {
+        update(0, 0, mWidth, mHeight);
+    }
+    
     virtual ~Screen() {};
 };
 

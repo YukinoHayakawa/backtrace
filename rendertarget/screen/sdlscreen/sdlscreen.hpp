@@ -34,7 +34,7 @@ protected:
     bool mFullscreen;
 
 public:
-    SDLScreen(uint32_t width, uint32_t height, uint8_t bitDepth, bool fullscreen);
+    SDLScreen(uint32_t width, uint32_t height, uint8_t colorDepth, float gamma, bool fullscreen);
     virtual ~SDLScreen();
 
     virtual void drawPixel(uint32_t x, uint32_t y, uint32_t color);

@@ -29,7 +29,7 @@
 
 namespace backtrace {
 
-class Root
+class Engine
 {
 public:
     std::unique_ptr<SceneManager> sceneManager;
@@ -41,7 +41,7 @@ public:
     float pixelSize;
 
 public:
-    Root(SceneManager* sceneManager,
+    Engine(SceneManager* sceneManager,
         RenderTarget* renderTarget,
         RayTracer* rayTracer,
         Sampler* sampler)
@@ -54,7 +54,7 @@ public:
         sampler->generateSamples();
     }
 
-    virtual ~Root() {}
+    virtual ~Engine() {}
 
     virtual void renderSceneOrthographic()
     {

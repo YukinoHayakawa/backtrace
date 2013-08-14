@@ -25,20 +25,14 @@ class RenderTarget
 {
 protected:
     uint32_t mWidth, mHeight;
-    uint8_t mBitDepth;
-    float mAspectRatio;
-    float mGamma;
-    float mInvGamma;
+    uint8_t mColorDepth;
     RGBColor mBackgroundColor;
 
 public:
-    RenderTarget(uint32_t width, uint32_t height, uint8_t bitDepth)
+    RenderTarget(uint32_t width, uint32_t height, uint8_t colorDepth)
         : mWidth(width),
         mHeight(height),
-        mBitDepth(bitDepth),
-        mAspectRatio(static_cast<float>(mWidth) / static_cast<float>(mHeight)),
-        mGamma(1.0),
-        mInvGamma(1.0)
+        mColorDepth(colorDepth)
     {
     }
 
@@ -48,33 +42,13 @@ public:
     virtual void drawPixel(uint32_t x, uint32_t y, uint8_t r, uint8_t g, uint8_t b) = 0;
     virtual void drawPixel(uint32_t x, uint32_t y, const RGBColor& color) = 0;
 
-    void setGamma(float gamma)
-    {
-        mGamma = gamma;
-        mInvGamma = 1.0f / gamma;
-    }
+    // void setWidth(uint32_t width) { mWidth = width; }
+    // void setHeight(uint32_t height) { mHeight = height; }
+    // void setColorDepth(uint8_t colorDepth) { mColorDepth = colorDepth; }
 
-    float getGamma() { return mGamma; }
-    float getInvGamma() { return mInvGamma; }
     uint32_t getWidth() { return mWidth; }
     uint32_t getHeight() { return mHeight; }
-    uint8_t getBitDepth() { return mBitDepth; }
-    float getAspectRatio() { return mAspectRatio; }
-
-    virtual void setResolution(uint32_t width, uint32_t height, uint8_t bitDepth)
-    {
-        mWidth = width;
-        mHeight = height;
-        mBitDepth = bitDepth;
-        mAspectRatio = static_cast<float>(mWidth) / static_cast<float>(mHeight);
-    }
-
-    virtual void update(uint32_t x, uint32_t y, uint32_t width, uint32_t height) {}
-
-    void update()
-    {
-        update(0, 0, mWidth, mHeight);
-    }
+    uint8_t getColorDepth() { return mColorDepth; }
 
     RGBColor getBackgroundColor()
     {

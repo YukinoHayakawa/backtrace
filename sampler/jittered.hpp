@@ -28,6 +28,7 @@ public:
     virtual void generateSamples()
     {
         // TO-DO: Template debuger.
+        // TO-DO: Reserve memory for vectors.
         std::cout << "JitteredSampler::generateSamples" << std::endl;
 
         int n = static_cast<int>(sqrt(mNumSamplesPerSet));
