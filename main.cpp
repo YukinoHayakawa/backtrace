@@ -15,12 +15,11 @@
  */
 
 #include <memory>
-#include <thread>
 
 #include "engine.hpp"
 #include "scenemanager/scenemanager.hpp"
-#include "rendertarget/screen/sdlscreen/sdlscreen.hpp"
-#include "rendertarget/screen/sdlscreen/sdlscreen.cpp"
+#include "rendertarget/window/sdlwindow/sdlwindow.hpp"
+#include "rendertarget/window/sdlwindow/sdlwindow.cpp"
 #include "object/primitive/sphere.hpp"
 #include "object/primitive/plane.hpp"
 #include "raytracer/simple.hpp"
@@ -31,7 +30,7 @@ using namespace backtrace;
 int main()
 {
     SceneManager* sm = new SceneManager();
-    Screen* scr = new SDLScreen(640, 480, 32, 1.0, false);
+    Window* scr = new SDLWindow(640, 480, 32, 0.01, 1.0, false);
     RayTracer* tracer = new SimpleRayTracer();
     Sampler* sampler = new JitteredSampler();
 
@@ -49,6 +48,5 @@ int main()
 
     scr->update();
 
-    std::chrono::milliseconds dura(2000);
-    std::this_thread::sleep_for(dura);
+    SDL_Delay(2000);
 }

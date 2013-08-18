@@ -27,12 +27,14 @@ protected:
     uint32_t mWidth, mHeight;
     uint8_t mColorDepth;
     RGBColor mBackgroundColor;
+    float mPixelSize;
 
 public:
-    RenderTarget(uint32_t width, uint32_t height, uint8_t colorDepth)
+    RenderTarget(uint32_t width, uint32_t height, uint8_t colorDepth, float pixelSize)
         : mWidth(width),
         mHeight(height),
-        mColorDepth(colorDepth)
+        mColorDepth(colorDepth),
+        mPixelSize(pixelSize)
     {
     }
 
@@ -45,10 +47,12 @@ public:
     // void setWidth(uint32_t width) { mWidth = width; }
     // void setHeight(uint32_t height) { mHeight = height; }
     // void setColorDepth(uint8_t colorDepth) { mColorDepth = colorDepth; }
+    void setPixelSize(float size) { mPixelSize = size; }
 
     uint32_t getWidth() { return mWidth; }
     uint32_t getHeight() { return mHeight; }
     uint8_t getColorDepth() { return mColorDepth; }
+    float getPixelSize() { return mPixelSize; }
 
     RGBColor getBackgroundColor()
     {

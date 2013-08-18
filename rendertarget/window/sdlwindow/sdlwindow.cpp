@@ -16,22 +16,18 @@
 
 #include <cmath>
 
-#if defined(_MSC_VER)
-#include "SDL.h"
-#else
-#include "SDL/SDL.h"
-#endif
+#include "SDL2/SDL.h"
 
-#include "sdlscreen.hpp"
+#include "sdlwindow.hpp"
 
 namespace backtrace {
 
-SDLScreen::SDLScreen(uint32_t width, uint32_t height, uint8_t colorDepth, float gamma, bool fullscreen)
-    : Screen(width, height, colorDepth, gamma),
+SDLWindow::SDLWindow(uint32_t width, uint32_t height, uint8_t colorDepth, float pixelSize, float gamma, bool fullscreen)
+    : Window(width, height, colorDepth, pixelSize, gamma),
     mFullscreen(fullscreen)
 {
     // Initialize SDL's subsystems - in this case, only video.
-    if(SDL_Init(SDL_INIT_VIDEO) < 0) 
+    if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) < 0) 
     {
         //throw std::runtime_error("Unable to init SDL: " + SDL_GetError());
         fprintf(stderr, "Unable to init SDL: %s\n", SDL_GetError());
@@ -39,38 +35,55 @@ SDLScreen::SDLScreen(uint32_t width, uint32_t height, uint8_t colorDepth, float 
     }
 
     // Attempt to create a window with pixels under specific mode.
-    mScreen = SDL_SetVideoMode(width, height, colorDepth,
-        fullscreen ? (SDL_HWSURFACE | SDL_FULLSCREEN) : SDL_HWSURFACE);
+    SDL_CreateWindowAndRenderer(width, height, 0, &mWindow, &mRenderer);
 
     // If we fail, return error.
-    if(mScreen == NULL) 
+    if(mWindow == nullptr || mRenderer == nullptr) 
     {
         //throw std::runtime_error()
         fprintf(stderr, "Unable to set video: %s\n", SDL_GetError());
         exit(1);
     }
+
+    SDL_SetRenderDrawColor(mRenderer, 0, 0, 0, 255);
+    SDL_RenderClear(mRenderer);
+
+    mDrawCanvas = SDL_CreateTexture(
+        mRenderer,
+        SDL_PIXELFORMAT_ARGB8888,
+        SDL_TEXTUREACCESS_STREAMING,
+        width, height
+    );
+
+    mPixels.reset(new uint32_t[width * height]);
 }
 
-SDLScreen::~SDLScreen()
+SDLWindow::~SDLWindow()
 {
     // Register SDL_Quit to be called at exit; makes sure things are
     // cleaned up when we quit.
     SDL_Quit();
 }
 
-void SDLScreen::drawPixel(uint32_t x, uint32_t y, uint32_t color)
+void SDLWindow::drawPixel(uint32_t x, uint32_t y, uint32_t color)
 {
-    unsigned int *ptr = (unsigned int*)mScreen->pixels;
-    int lineoffset = y * (mScreen->pitch / 4);
-    ptr[lineoffset + x] = color;
+    int pitch = mWidth * sizeof(uint32_t);
+    int lineoffset = y * (pitch / 4);
+    mPixels[lineoffset + x] = color;
 }
 
-void SDLScreen::drawPixel(uint32_t x, uint32_t y, uint8_t r, uint8_t g, uint8_t b)
+void SDLWindow::drawPixel(uint32_t x, uint32_t y, uint8_t r, uint8_t g, uint8_t b)
 {
-    drawPixel(x, y, SDL_MapRGB(mScreen->format, r, g, b));
+    uint32_t color = 0;
+    color += r;
+    color = color << 8;
+    color += g;
+    color = color << 8;
+    color += b;
+    drawPixel(x, y, color);
 }
 
-void SDLScreen::drawPixel(uint32_t x, uint32_t y, const RGBColor& color)
+void SDLWindow::drawPixel(uint32_t x, uint32_t y, const RGBColor& color)
 {
     if(mGamma == 1.0)
     {
@@ -86,10 +99,11 @@ void SDLScreen::drawPixel(uint32_t x, uint32_t y, const RGBColor& color)
     }
 }
 
-void SDLScreen::update(uint32_t x, uint32_t y, uint32_t width, uint32_t height)
+void SDLWindow::update(uint32_t x, uint32_t y, uint32_t width, uint32_t height)
 {
-    // Tell SDL to update the screen
-    SDL_UpdateRect(mScreen, x, y, width, height);
+    SDL_UpdateTexture(mDrawCanvas, NULL, mPixels.get(), mWidth * sizeof(uint32_t));
+    SDL_RenderCopy(mRenderer, mDrawCanvas, NULL, NULL);
+    SDL_RenderPresent(mRenderer);
 }
 
 }

@@ -19,6 +19,9 @@
 
 #include <memory>
 
+#include <iostream>
+#include "SDL2/SDL.h"
+
 #include "event/event.hpp"
 #include "object/geometricobject.hpp"
 #include "math/math.hpp"
@@ -26,6 +29,7 @@
 #include "rendertarget/rendertarget.hpp"
 #include "scenemanager/scenemanager.hpp"
 #include "sampler/sampler.hpp"
+#include "util/workqueue.hpp"
 
 namespace backtrace {
 
@@ -38,7 +42,15 @@ public:
     std::unique_ptr<Sampler> sampler;
     RGBColor backgroundColor;
 
-    float pixelSize;
+    Factory<EventTarget> eventTargetFactory;
+    EventDispatcher eventDispatcher;
+    WorkQueue defaultWorkQueue;
+
+    EventTarget* rootTarget;
+    EventTarget* inputDevicesTarget;
+    EventTarget* rendererTarget;
+    // EventTarget* physicsTarget;
+    // EventTarget* guiTarget;
 
 public:
     Engine(SceneManager* sceneManager,
@@ -49,9 +61,19 @@ public:
         renderTarget(renderTarget),
         rayTracer(rayTracer),
         sampler(sampler),
-        pixelSize(0.01)
+        eventDispatcher(4),
+        defaultWorkQueue(4)
     {
         sampler->generateSamples();
+
+        rootTarget = eventTargetFactory.produce<EventTarget>();
+        inputDevicesTarget = eventTargetFactory.produce<EventTarget>();
+        rendererTarget = eventTargetFactory.produce<EventTarget>();
+        
+        inputDevicesTarget->setParent(rootTarget);
+        rendererTarget->setParent(rootTarget);
+
+        SDL_SetEventFilter(&Engine::sdlEventFilter, this);
     }
 
     virtual ~Engine() {}
@@ -75,8 +97,8 @@ public:
                 for(int samples = 0; samples < sampler->mNumSamplesPerSet; ++samples)
                 {
                     unitSample = sampler->getNextUnitSquareSample();
-                    pixelSample.first = pixelSize * (c - 0.5 * renderTarget->getWidth() + unitSample.first);
-                    pixelSample.second = pixelSize * (r - 0.5 * renderTarget->getHeight() + unitSample.second);
+                    pixelSample.first = renderTarget->getPixelSize() * (c - 0.5 * renderTarget->getWidth() + unitSample.first);
+                    pixelSample.second = renderTarget->getPixelSize() * (r - 0.5 * renderTarget->getHeight() + unitSample.second);
                     ray.origin = Point3d(pixelSample.first, pixelSample.second, zw);
                     pixelColor += rayTracer->traceRay(sceneManager.get(), ray);
                 }
@@ -109,8 +131,8 @@ public:
                 {
                     for(int horizontal = 0; horizontal < sampleSqrt; ++horizontal)
                     {
-                        x = pixelSize * (c - 0.5 * renderTarget->getWidth() + (horizontal + 0.5) / sampleSqrt);
-                        y = pixelSize * (r - 0.5 * renderTarget->getHeight() + (vertical + 0.5) / sampleSqrt);
+                        x = renderTarget->getPixelSize() * (c - 0.5 * renderTarget->getWidth() + (horizontal + 0.5) / sampleSqrt);
+                        y = renderTarget->getPixelSize() * (r - 0.5 * renderTarget->getHeight() + (vertical + 0.5) / sampleSqrt);
                         ray.direction = Point3d(x, y, -viewPlaneDistance);
                         ray.direction.normalize();
                         pixelColor += rayTracer->traceRay(sceneManager.get(), ray);
@@ -121,6 +143,15 @@ public:
                 renderTarget->drawPixel(c, r, pixelColor);
             }
         }
+    }
+
+    static int sdlEventFilter(void* userdata, SDL_Event* event)
+    {
+        Engine* engine = static_cast<Engine*>(userdata);
+
+        std::cout << "SDL Event caught: " << event->type << std::endl;
+
+        return 0; // drop from the queue
     }
 };
 

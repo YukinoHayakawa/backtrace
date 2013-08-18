@@ -6,16 +6,18 @@ if(CMAKE_COMPILER_IS_GNUCXX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic -std=c++11 -O3 -g -pthread")
 endif()
 
-find_Package(SDL REQUIRED)
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMakeModules)
+
+find_Package(SDL2 REQUIRED)
 
 # Workaround for the non-working REQUIRED flag
-if(NOT SDL_FOUND)
-   message(FATAL_ERROR "SDL not found!")
-endif(NOT SDL_FOUND)
+if(NOT SDL2_FOUND)
+   message(FATAL_ERROR "SDL2 not found!")
+endif(NOT SDL2_FOUND)
 
 link_libraries(
-    ${SDL_LIBRARY}
-    SDLmain # Sadly not included in SDL_LIBRARY variable
+    ${SDL2_LIBRARY}
+    SDL2main # Sadly not included in SDL_LIBRARY variable
 )
 
 add_executable(

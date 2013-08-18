@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-#ifndef BACKTRACE_RENDERTARGET_SCREEN_HPP
-#define BACKTRACE_RENDERTARGET_SCREEN_HPP
+#ifndef BACKTRACE_RENDERTARGET_WINDOW_HPP
+#define BACKTRACE_RENDERTARGET_WINDOW_HPP
 
 #include "../rendertarget.hpp"
 
 namespace backtrace {
 
-class Screen : public RenderTarget
+class Window : public RenderTarget
 {
 protected:
     float mAspectRatio;
@@ -29,8 +29,8 @@ protected:
     float mInvGamma;
 
 public:
-    Screen(uint32_t width, uint32_t height, uint8_t colorDepth, float gamma = 1.0f)
-        : RenderTarget(width, height, colorDepth),
+    Window(uint32_t width, uint32_t height, uint8_t colorDepth, float pixelSize, float gamma = 1.0f)
+        : RenderTarget(width, height, colorDepth, pixelSize),
         mAspectRatio(static_cast<float>(width) / static_cast<float>(height)),
         mGamma(gamma),
         mInvGamma(1.0 / gamma)
@@ -56,7 +56,7 @@ public:
         update(0, 0, mWidth, mHeight);
     }
     
-    virtual ~Screen() {};
+    virtual ~Window() {};
 };
 
 }
