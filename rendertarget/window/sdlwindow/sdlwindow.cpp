@@ -27,7 +27,7 @@ SDLWindow::SDLWindow(uint32_t width, uint32_t height, uint8_t colorDepth, float 
     mFullscreen(fullscreen)
 {
     // Initialize SDL's subsystems - in this case, only video.
-    if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) < 0) 
+    if(SDL_Init(SDL_INIT_VIDEO) < 0) 
     {
         //throw std::runtime_error("Unable to init SDL: " + SDL_GetError());
         fprintf(stderr, "Unable to init SDL: %s\n", SDL_GetError());

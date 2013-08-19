@@ -48,5 +48,10 @@ int main()
 
     scr->update();
 
-    SDL_Delay(2000);
+    engine.inputDevicesTarget->addEventListener<KeyEvent::Listener>(
+        Engine::buildKeyEventName(SDLK_ESCAPE, Engine::Pressed),
+        [&engine](Event*) { engine.shouldExit(); }
+    );
+
+    engine.waitExit();
 }

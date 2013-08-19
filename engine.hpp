@@ -18,8 +18,9 @@
 #define BACKTRACE_RAYTRACER_ROOT_H
 
 #include <memory>
+#include <mutex>
+#include <condition_variable>
 
-#include <iostream>
 #include "SDL2/SDL.h"
 
 #include "event/event.hpp"
@@ -30,6 +31,7 @@
 #include "scenemanager/scenemanager.hpp"
 #include "sampler/sampler.hpp"
 #include "util/workqueue.hpp"
+#include "gameevents.hpp"
 
 namespace backtrace {
 
@@ -44,6 +46,7 @@ public:
 
     Factory<EventTarget> eventTargetFactory;
     EventDispatcher eventDispatcher;
+
     WorkQueue defaultWorkQueue;
 
     EventTarget* rootTarget;
@@ -51,6 +54,12 @@ public:
     EventTarget* rendererTarget;
     // EventTarget* physicsTarget;
     // EventTarget* guiTarget;
+
+    bool shouldContinue;
+    bool pendingExit;
+
+    std::mutex waitExitMutex;
+    std::condition_variable waitExitCV;
 
 public:
     Engine(SceneManager* sceneManager,
@@ -62,7 +71,9 @@ public:
         rayTracer(rayTracer),
         sampler(sampler),
         eventDispatcher(4),
-        defaultWorkQueue(4)
+        defaultWorkQueue(4),
+        shouldContinue(true),
+        pendingExit(false)
     {
         sampler->generateSamples();
 
@@ -73,7 +84,7 @@ public:
         inputDevicesTarget->setParent(rootTarget);
         rendererTarget->setParent(rootTarget);
 
-        SDL_SetEventFilter(&Engine::sdlEventFilter, this);
+        defaultWorkQueue.push(std::bind(&Engine::runEventLoop, this));
     }
 
     virtual ~Engine() {}
@@ -145,13 +156,92 @@ public:
         }
     }
 
-    static int sdlEventFilter(void* userdata, SDL_Event* event)
+    void runEventLoop()
     {
-        Engine* engine = static_cast<Engine*>(userdata);
+        SDL_Event event;
 
-        std::cout << "SDL Event caught: " << event->type << std::endl;
+        while(shouldContinue && SDL_WaitEvent(&event))
+        {
+            switch(event.type)
+            {
+            case SDL_KEYDOWN:
+                eventDispatcher.postEvent<KeyEvent>(
+                    buildKeyEventName(event.key.keysym.sym, Pressed), inputDevicesTarget
+                );
+                break;
 
-        return 0; // drop from the queue
+            case SDL_KEYUP:
+                eventDispatcher.postEvent<KeyEvent>(
+                    buildKeyEventName(event.key.keysym.sym, Released), inputDevicesTarget
+                );
+                break;
+
+            case SDL_MOUSEMOTION:
+                eventDispatcher.postEvent<MouseMotionEvent>(
+                    "onMouseMoved", inputDevicesTarget,
+                    event.motion.x, event.motion.y,
+                    event.motion.xrel, event.motion.yrel
+                );
+                break;
+
+            case SDL_MOUSEBUTTONDOWN:
+                eventDispatcher.postEvent<MouseKeyEvent>(
+                    buildMouseKeyEventName(event.button.button, Pressed), inputDevicesTarget,
+                    event.button.x, event.button.y
+                );
+                break;
+
+            case SDL_MOUSEBUTTONUP:
+                eventDispatcher.postEvent<MouseKeyEvent>(
+                    buildMouseKeyEventName(event.button.button, Released), inputDevicesTarget,
+                    event.button.x, event.button.y
+                );
+                break;
+
+            default:
+                break;
+            }
+        }
+    }
+
+    bool shouldExit()
+    {
+        if(pendingExit) return false;
+        pendingExit = true;
+
+        auto evt = eventDispatcher.createEvent<ExitRequestedEvent>("onExitRequested", rootTarget);
+        evt->addCallback([this](Event*) { shouldContinue = false; waitExitCV.notify_all(); });
+        eventDispatcher.postEvent(evt);
+
+        return true;
+    }
+
+    enum KeyState
+    {
+        Pressed = true,
+        Released = false
+    };
+
+    static std::string buildKeyEventName(SDL_Keycode keyCode, KeyState keyState)
+    {
+        std::string dest("onKey");
+        dest += (keyCode + 1);
+        dest += keyState ? "Pressed" : "Released";
+        return dest;
+    }
+
+    static std::string buildMouseKeyEventName(SDL_Keycode keyCode, KeyState keyState)
+    {
+        std::string dest("onMouseKey");
+        dest += (keyCode + 1);
+        dest += keyState ? "Pressed" : "Released";
+        return dest;
+    }
+
+    void waitExit()
+    {
+        std::unique_lock<std::mutex> lock(waitExitMutex);
+        waitExitCV.wait(lock, [this]{ return pendingExit; });
     }
 };
 
