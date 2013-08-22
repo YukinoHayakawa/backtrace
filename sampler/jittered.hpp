@@ -43,7 +43,7 @@ public:
                         (static_cast<float>(width) + randomFloat()) / static_cast<float>(n),
                         (static_cast<float>(height) + randomFloat()) / static_cast<float>(n)
                     );
-                    std::cout << "Sample generated: " << sample.first << " " << sample.second << std::endl;
+                    std::cout << "Sample generated: " << sample.x << " " << sample.y << std::endl;
                     mUnitSquaredSamples.push_back(sample);
                 }
             }

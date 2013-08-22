@@ -17,6 +17,7 @@
 #ifndef BACKTRACE_MATH_HPP
 #define BACKTRACE_MATH_HPP
 
+#include "detail/vector2.hpp"
 #include "detail/vector3.hpp"
 #include "detail/typedefs.hpp"
 #include "detail/constants.hpp"

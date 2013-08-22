@@ -29,16 +29,18 @@ public: // TO-DO: Should be protected.
     int mNumSamplesPerSet;
     int mNumSampleSets;
     std::vector<Point2d> mUnitSquaredSamples;
+    std::vector<Point2d> mUnitDiskSamples;
+    std::vector<Point3d> mHemisphereSamples;
     std::vector<int> mShuffledIndices;
     int mRandomIndexJump;
-    int mLastIndex;
+    int mIndexCount;
 
 public:
     Sampler()
         : mNumSamplesPerSet(12),
         mNumSampleSets(1),
         mRandomIndexJump(0),
-        mLastIndex(0)
+        mIndexCount(0)
     {
     }
 
@@ -56,7 +58,79 @@ public:
 
     Point2d getNextUnitSquareSample()
     {
-        return mUnitSquaredSamples[mLastIndex++ % (mNumSamplesPerSet * mNumSampleSets)];
+        // TO-DO: Random simple. Referrence: p81.
+        return mUnitSquaredSamples[mIndexCount++ % (mNumSamplesPerSet * mNumSampleSets)];
+    }
+
+    void mapSamplesToUnitDisk()
+    {
+        float radius, phi;
+        Point2d samplePoint;
+
+        mUnitDiskSamples.reserve(mUnitSquaredSamples.size());
+
+        auto end = mUnitSquaredSamples.end();
+        for(auto iter = mUnitSquaredSamples.begin(); iter != end; ++iter)
+        {
+            samplePoint.x = 2.0 * (*iter).x - 1.0;
+            samplePoint.y = 2.0 * (*iter).y - 1.0;
+
+            if(samplePoint.x > -samplePoint.y)
+            {
+                if(samplePoint.x > samplePoint.y)
+                {
+                    radius = samplePoint.x;
+                    phi = samplePoint.y / samplePoint.x;
+                }
+                else
+                {
+                    radius = samplePoint.y;
+                    phi = 2 - samplePoint.x / samplePoint.y;
+                }
+            }
+            else
+            {
+                if(samplePoint.x < samplePoint.y)
+                {
+                    radius = -samplePoint.x;
+                    phi = 4 + samplePoint.y / samplePoint.x;
+                }
+                else
+                {
+                    radius = -samplePoint.y;
+                    if(samplePoint.y != 0.0)
+                    {
+                        phi = 6 - samplePoint.x / samplePoint.y;
+                    }
+                    else
+                    {
+                        phi = 0.0;
+                    }
+                }
+            }
+
+            phi *= PI / 4.0;
+            mUnitDiskSamples.push_back(Point2d(radius * cos(phi), radius * sin(phi)));
+        }
+    }
+
+    void mapSamplesToHemisphere(float e)
+    {
+        mHemisphereSamples.reserve(mUnitSquaredSamples.size());
+
+        float cosPhi, sinPhi, cosTheta, sinTheta;
+        float temp;
+
+        auto end = mUnitSquaredSamples.end();
+        for(auto iter = mUnitSquaredSamples.begin(); iter != end; ++iter)
+        {
+            temp = 2.0 * PI * (*iter).x;
+            cosPhi = cos(temp);
+            sinPhi = sin(temp);
+            cosTheta = pow(1.0 - (*iter).y, 1.0 / (e + 1.0));
+            sinTheta = sqrt(1.0 - cosTheta * cosTheta);
+            mHemisphereSamples.push_back(Point3d(sinTheta * cosPhi, sinTheta * sinPhi, cosTheta));
+        }
     }
 };
 

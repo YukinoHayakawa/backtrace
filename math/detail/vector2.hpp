@@ -14,25 +14,26 @@
  * limitations under the License.
  */
 
-#ifndef BACKTRACE_MATH_DETAIL_TYPEDEFS_H
-#define BACKTRACE_MATH_DETAIL_TYPEDEFS_H
-
-#include <utility>
-
-#include "vector3.hpp"
+#ifndef BACKTRACE_MATH_DETAIL_VECTOR2_H
+#define BACKTRACE_MATH_DETAIL_VECTOR2_H
 
 namespace backtrace {
 
-typedef Vector3<float> Vector3f;
-typedef Vector3f Point3f;
-typedef Vector3f Normalf;
+template<typename T>
+struct Vector2
+{
+    T x, y;
 
-typedef Vector3<double> Vector3d;
-typedef Vector3d Point3d;
-typedef Vector3d Normald;
+    Vector2(T x, T y)
+        : x(x), y(y)
+    {
+    }
 
-typedef Vector2<double> Vector2d;
-typedef Vector2d Point2d;
+    Vector2()
+        : x(T()), y(T())
+    {
+    }
+};
 
 }
 

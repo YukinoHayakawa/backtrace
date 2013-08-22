@@ -108,9 +108,9 @@ public:
                 for(int samples = 0; samples < sampler->mNumSamplesPerSet; ++samples)
                 {
                     unitSample = sampler->getNextUnitSquareSample();
-                    pixelSample.first = renderTarget->getPixelSize() * (c - 0.5 * renderTarget->getWidth() + unitSample.first);
-                    pixelSample.second = renderTarget->getPixelSize() * (r - 0.5 * renderTarget->getHeight() + unitSample.second);
-                    ray.origin = Point3d(pixelSample.first, pixelSample.second, zw);
+                    pixelSample.x = renderTarget->getPixelSize() * (c - 0.5 * renderTarget->getWidth() + unitSample.x);
+                    pixelSample.y = renderTarget->getPixelSize() * (r - 0.5 * renderTarget->getHeight() + unitSample.y);
+                    ray.origin = Point3d(pixelSample.x, pixelSample.y, zw);
                     pixelColor += rayTracer->traceRay(sceneManager.get(), ray);
                 }
 
