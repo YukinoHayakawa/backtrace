@@ -138,6 +138,16 @@ public:
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_products.count(product) == 1;
     }
+
+    void iterateProducts(const std::function<void(const T&)>& function)
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        auto end = m_products.end();
+        for(auto iter = m_products.begin(); iter != end; ++iter)
+        {
+            function(*(iter->first));
+        }
+    }
 };
 
 } // namespace backtrace

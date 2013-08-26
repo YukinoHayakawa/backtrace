@@ -24,29 +24,25 @@
 
 namespace backtrace {
 
-class SceneManager
+class Scene
 {
     friend class Root;
 
 protected:
     Factory<GeometricObject> mObjectFactory;
-    std::unordered_set<GeometricObject*> mObjects;
 
 public:
-    virtual ~SceneManager() {}
+    virtual ~Scene() {}
 
     template<typename T, typename...Args>
     T* addObject(Args...args)
     {
-        T* naked = mObjectFactory.produce<T>(std::forward<Args>(args)...);
-        mObjects.insert(naked);
-        return naked;
+        return mObjectFactory.produce<T>(std::forward<Args>(args)...);
     }
 
     void removeObject(GeometricObject* objectPtr)
     {
         mObjectFactory.recycle(objectPtr);
-        mObjects.erase(objectPtr);
     }
 
     bool hitObject(const Ray& ray, ShadeRecord& rec)
@@ -54,16 +50,14 @@ public:
         double t;
         double tMin = kHugeValue;
 
-        auto end = mObjects.end();
-        for(auto iter = mObjects.begin(); iter != end; ++iter)
-        {
-            if((*iter)->hit(ray, t, rec) && (t < tMin))
+        mObjectFactory.iterateProducts([&t, &tMin, &ray, &rec](const GeometricObject& obj) {
+            if(obj.hit(ray, t, rec) && (t < tMin))
             {
                 tMin = t;
                 rec.hitAnObject = true;
-                rec.color = (*iter)->getColor();
+                rec.color = obj.getColor();
             }
-        }
+        });
 
         return rec.hitAnObject;
     }

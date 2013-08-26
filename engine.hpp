@@ -28,7 +28,7 @@
 #include "math/math.hpp"
 #include "raytracer/raytracer.hpp"
 #include "rendertarget/rendertarget.hpp"
-#include "scenemanager/scenemanager.hpp"
+#include "scene/scene.hpp"
 #include "sampler/sampler.hpp"
 #include "util/workqueue.hpp"
 #include "gameevents.hpp"
@@ -38,7 +38,7 @@ namespace backtrace {
 class Engine
 {
 public:
-    std::unique_ptr<SceneManager> sceneManager;
+    std::unique_ptr<Scene> scene;
     std::unique_ptr<RenderTarget> renderTarget;
     std::unique_ptr<RayTracer> rayTracer;
     std::unique_ptr<Sampler> sampler;
@@ -62,11 +62,11 @@ public:
     std::condition_variable waitExitCV;
 
 public:
-    Engine(SceneManager* sceneManager,
+    Engine(Scene* scene,
         RenderTarget* renderTarget,
         RayTracer* rayTracer,
         Sampler* sampler)
-        : sceneManager(sceneManager),
+        : scene(scene),
         renderTarget(renderTarget),
         rayTracer(rayTracer),
         sampler(sampler),
@@ -111,7 +111,7 @@ public:
                     pixelSample.x = renderTarget->getPixelSize() * (c - 0.5 * renderTarget->getWidth() + unitSample.x);
                     pixelSample.y = renderTarget->getPixelSize() * (r - 0.5 * renderTarget->getHeight() + unitSample.y);
                     ray.origin = Point3d(pixelSample.x, pixelSample.y, zw);
-                    pixelColor += rayTracer->traceRay(sceneManager.get(), ray);
+                    pixelColor += rayTracer->traceRay(scene.get(), ray);
                 }
 
                 pixelColor /= sampler->mNumSamplesPerSet;
@@ -146,7 +146,7 @@ public:
                         y = renderTarget->getPixelSize() * (r - 0.5 * renderTarget->getHeight() + (vertical + 0.5) / sampleSqrt);
                         ray.direction = Point3d(x, y, -viewPlaneDistance);
                         ray.direction.normalize();
-                        pixelColor += rayTracer->traceRay(sceneManager.get(), ray);
+                        pixelColor += rayTracer->traceRay(scene.get(), ray);
                     }
                 }
 

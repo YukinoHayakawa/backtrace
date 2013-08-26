@@ -19,7 +19,7 @@
 
 #include "../util/ray.hpp"
 #include "../util/rgbcolor.hpp"
-#include "../scenemanager/scenemanager.hpp"
+#include "../scene/scene.hpp"
  
 namespace backtrace {
 
@@ -28,7 +28,7 @@ class RayTracer
 public:
     virtual ~RayTracer() {}
 
-    virtual RGBColor traceRay(SceneManager* sm, const Ray& ray)
+    virtual RGBColor traceRay(Scene* sm, const Ray& ray)
     {
         return RGBColor();
     }

@@ -28,7 +28,7 @@ public:
     virtual ~GeometricObject() {};
     virtual bool hit(const Ray& ray, double& tmin, ShadeRecord& result) const {};
 
-    RGBColor getColor()
+    RGBColor getColor() const
     {
         return mColor;
     }

@@ -17,7 +17,7 @@
 #include <memory>
 
 #include "engine.hpp"
-#include "scenemanager/scenemanager.hpp"
+#include "scene/scene.hpp"
 #include "rendertarget/window/sdlwindow/sdlwindow.hpp"
 #include "rendertarget/window/sdlwindow/sdlwindow.cpp"
 #include "object/primitive/sphere.hpp"
@@ -29,18 +29,18 @@ using namespace backtrace;
 
 int main()
 {
-    SceneManager* sm = new SceneManager();
+    Scene* sc = new Scene();
     Window* scr = new SDLWindow(640, 480, 32, 0.01, 1.0, false);
     RayTracer* tracer = new SimpleRayTracer();
     Sampler* sampler = new JitteredSampler();
 
-    Engine engine(sm, scr, tracer, sampler);
+    Engine engine(sc, scr, tracer, sampler);
 
-    auto sphere = engine.sceneManager->addObject<Sphere>();
+    auto sphere = engine.scene->addObject<Sphere>();
     sphere->setColor(RGBColor(1, 0, 0));
     sphere->mCenter = (0, 0.5, 0);
 
-    sphere = engine.sceneManager->addObject<Sphere>();
+    sphere = engine.scene->addObject<Sphere>();
     sphere->setColor(RGBColor(1, 1, 0));
     sphere->mCenter = (0, 0, 0.5);
 

@@ -26,7 +26,7 @@ class SimpleRayTracer : public RayTracer
 public:
     virtual ~SimpleRayTracer() {}
 
-    virtual RGBColor traceRay(SceneManager* sm, const Ray& ray)
+    virtual RGBColor traceRay(Scene* sm, const Ray& ray)
     {
         ShadeRecord rec;
 
