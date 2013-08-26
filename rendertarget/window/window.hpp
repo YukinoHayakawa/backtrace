@@ -48,13 +48,6 @@ public:
 
     float getAspectRatio() { return mAspectRatio; }
     // void setAspectRatio(float ratio) { mAspectRatio = ratio; }
-
-    virtual void update(uint32_t x, uint32_t y, uint32_t width, uint32_t height) {}
-
-    void update()
-    {
-        update(0, 0, mWidth, mHeight);
-    }
     
     virtual ~Window() {};
 };

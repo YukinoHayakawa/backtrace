@@ -118,7 +118,8 @@ struct Vector3
         return Vector3(-x, -y, -z);
     }
 
-    Vector3 operator*(T scalar) const
+    template<typename P>
+    Vector3 operator*(P scalar) const
     {
         return Vector3(scalar * x, scalar * y, scalar * z);
     }
@@ -143,8 +144,8 @@ struct Vector3
     }
 };
 
-template<typename T>
-Vector3<T> operator*(T scalar, const Vector3<T>& vector)
+template<typename T, typename P>
+Vector3<T> operator*(P scalar, const Vector3<T>& vector)
 {
     return Vector3<T>(scalar * vector.x, scalar * vector.y, scalar * vector.z);
 }

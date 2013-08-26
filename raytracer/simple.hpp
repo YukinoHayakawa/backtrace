@@ -17,6 +17,10 @@
 #ifndef BACKTRACE_RAYTRACER_SIMPLE_H
 #define BACKTRACE_RAYTRACER_SIMPLE_H
 
+#include "../util/ray.hpp"
+#include "../scene/scene.hpp"
+#include "../util/shaderecord.hpp"
+
 #include "raytracer.hpp"
  
 namespace backtrace {
@@ -26,11 +30,11 @@ class SimpleRayTracer : public RayTracer
 public:
     virtual ~SimpleRayTracer() {}
 
-    virtual RGBColor traceRay(Scene* sm, const Ray& ray)
+    virtual RGBColor traceRay(Ray* ray, Scene* scene)
     {
         ShadeRecord rec;
-
-        if(sm->hitObject(ray, rec))
+        scene->hitObject(ray, &rec);
+        if(rec.hitAnObject)
             return rec.color;
         else
             return RGBColor();

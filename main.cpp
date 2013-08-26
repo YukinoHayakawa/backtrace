@@ -24,17 +24,21 @@
 #include "object/primitive/plane.hpp"
 #include "raytracer/simple.hpp"
 #include "sampler/jittered.hpp"
+#include "camera/pinhole.hpp"
 
 using namespace backtrace;
 
 int main()
 {
-    Scene* sc = new Scene();
-    Window* scr = new SDLWindow(640, 480, 32, 0.01, 1.0, false);
-    RayTracer* tracer = new SimpleRayTracer();
-    Sampler* sampler = new JitteredSampler();
+    Engine engine;
 
-    Engine engine(sc, scr, tracer, sampler);
+    engine.scene.reset(new Scene());
+    engine.renderTarget.reset(new SDLWindow(64, 48, 32, 0.1, 1.0, false));
+    engine.rayTracer.reset(new SimpleRayTracer());
+    engine.camera.reset(new PinholeCamera(10.0, 1.0));
+    engine.camera->setEyePosition(Vector3d(0.0, 0.0, 10.0));
+    engine.camera->computeUVW();
+    engine.camera->setSimpler(new JitteredSampler());
 
     auto sphere = engine.scene->addObject<Sphere>();
     sphere->setColor(RGBColor(1, 0, 0));
@@ -44,9 +48,7 @@ int main()
     sphere->setColor(RGBColor(1, 1, 0));
     sphere->mCenter = (0, 0, 0.5);
 
-    engine.renderSceneOrthographic();
-
-    scr->update();
+    engine.renderScene();
 
     engine.inputDevicesTarget->addEventListener<KeyEvent::Listener>(
         Engine::buildKeyEventName(SDLK_ESCAPE, Engine::Pressed),

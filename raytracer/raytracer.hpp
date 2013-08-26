@@ -17,9 +17,7 @@
 #ifndef BACKTRACE_RAYTRACERBASE_H
 #define BACKTRACE_RAYTRACERBASE_H
 
-#include "../util/ray.hpp"
 #include "../util/rgbcolor.hpp"
-#include "../scene/scene.hpp"
  
 namespace backtrace {
 
@@ -28,7 +26,7 @@ class RayTracer
 public:
     virtual ~RayTracer() {}
 
-    virtual RGBColor traceRay(Scene* sm, const Ray& ray)
+    virtual RGBColor traceRay(class Ray* ray, class Scene* scene)
     {
         return RGBColor();
     }

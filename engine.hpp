@@ -32,7 +32,8 @@
 #include "sampler/sampler.hpp"
 #include "util/workqueue.hpp"
 #include "gameevents.hpp"
-
+#include "camera/camera.hpp"
+ 
 namespace backtrace {
 
 class Engine
@@ -41,7 +42,7 @@ public:
     std::unique_ptr<Scene> scene;
     std::unique_ptr<RenderTarget> renderTarget;
     std::unique_ptr<RayTracer> rayTracer;
-    std::unique_ptr<Sampler> sampler;
+    std::unique_ptr<Camera> camera;
     RGBColor backgroundColor;
 
     Factory<EventTarget> eventTargetFactory;
@@ -62,21 +63,12 @@ public:
     std::condition_variable waitExitCV;
 
 public:
-    Engine(Scene* scene,
-        RenderTarget* renderTarget,
-        RayTracer* rayTracer,
-        Sampler* sampler)
-        : scene(scene),
-        renderTarget(renderTarget),
-        rayTracer(rayTracer),
-        sampler(sampler),
-        eventDispatcher(4),
+    Engine()
+        : eventDispatcher(4),
         defaultWorkQueue(4),
         shouldContinue(true),
         pendingExit(false)
     {
-        sampler->generateSamples();
-
         rootTarget = eventTargetFactory.produce<EventTarget>();
         inputDevicesTarget = eventTargetFactory.produce<EventTarget>();
         rendererTarget = eventTargetFactory.produce<EventTarget>();
@@ -89,71 +81,10 @@ public:
 
     virtual ~Engine() {}
 
-    virtual void renderSceneOrthographic()
+    void renderScene()
     {
-        RGBColor pixelColor;
-        Ray ray;
-        double zw = 100.0;
-        Point2d unitSample;
-        Point2d pixelSample;
-
-        ray.direction = Vector3d(0.0, 0.0, -1.0);
-
-        for(int r = 0; r < renderTarget->getHeight(); ++r)
-        {
-            for(int c = 0; c < renderTarget->getWidth(); ++c)
-            {
-                pixelColor = RGBColor();
-
-                for(int samples = 0; samples < sampler->mNumSamplesPerSet; ++samples)
-                {
-                    unitSample = sampler->getNextUnitSquareSample();
-                    pixelSample.x = renderTarget->getPixelSize() * (c - 0.5 * renderTarget->getWidth() + unitSample.x);
-                    pixelSample.y = renderTarget->getPixelSize() * (r - 0.5 * renderTarget->getHeight() + unitSample.y);
-                    ray.origin = Point3d(pixelSample.x, pixelSample.y, zw);
-                    pixelColor += rayTracer->traceRay(scene.get(), ray);
-                }
-
-                pixelColor /= sampler->mNumSamplesPerSet;
-                renderTarget->drawPixel(c, r, pixelColor);
-            }
-        }
-    }
-
-    virtual void renderScenePerspective()
-    {
-        RGBColor pixelColor;
-        Ray ray;
-        double zw = 100.0;
-        double x, y;
-        int samples = 16;
-        int sampleSqrt = static_cast<int>(sqrt(samples));
-        double viewPlaneDistance = 100.0;
-
-        ray.origin = Vector3d(0.0, 0.0, zw);
-
-        for(int r = 0; r < renderTarget->getHeight(); ++r)
-        {
-            for(int c = 0; c < renderTarget->getWidth(); ++c)
-            {
-                pixelColor = RGBColor();
-
-                for(int vertical = 0; vertical < sampleSqrt; ++vertical)
-                {
-                    for(int horizontal = 0; horizontal < sampleSqrt; ++horizontal)
-                    {
-                        x = renderTarget->getPixelSize() * (c - 0.5 * renderTarget->getWidth() + (horizontal + 0.5) / sampleSqrt);
-                        y = renderTarget->getPixelSize() * (r - 0.5 * renderTarget->getHeight() + (vertical + 0.5) / sampleSqrt);
-                        ray.direction = Point3d(x, y, -viewPlaneDistance);
-                        ray.direction.normalize();
-                        pixelColor += rayTracer->traceRay(scene.get(), ray);
-                    }
-                }
-
-                pixelColor /= samples;
-                renderTarget->drawPixel(c, r, pixelColor);
-            }
-        }
+        camera->renderScene(scene.get(), renderTarget.get(), rayTracer.get());
+        renderTarget->update();
     }
 
     void runEventLoop()

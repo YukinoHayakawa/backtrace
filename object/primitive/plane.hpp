@@ -38,22 +38,22 @@ public:
     
     virtual ~Plane() {}
     
-    virtual bool hit(const Ray& ray, double& tmin, ShadeRecord& result) const;
+    virtual bool hit(Ray* ray, double& tmin, ShadeRecord* result) const;
 
 public: // TO-DO: Should be protected.
     Point3d mPoint;
     Normald mNormal;
 };
 
-bool Plane::hit(const Ray& ray, double& tmin, ShadeRecord& result) const
+bool Plane::hit(Ray* ray, double& tmin, ShadeRecord* result) const
 {
-    double t = (mPoint - ray.origin) * mNormal / (ray.direction * mNormal);
+    double t = (mPoint - ray->origin) * mNormal / (ray->direction * mNormal);
 
     if(t > kEpsilon)
     {
         tmin = t;
-        result.normal = mNormal;
-        result.localHitPoint = ray.origin + t * ray.direction;
+        result->normal = mNormal;
+        result->localHitPoint = ray->origin + t * ray->direction;
         return true;
     }
     else

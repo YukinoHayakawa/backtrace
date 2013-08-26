@@ -45,21 +45,19 @@ public:
         mObjectFactory.recycle(objectPtr);
     }
 
-    bool hitObject(const Ray& ray, ShadeRecord& rec)
+    void hitObject(Ray* ray, ShadeRecord* rec)
     {
         double t;
         double tMin = kHugeValue;
 
-        mObjectFactory.iterateProducts([&t, &tMin, &ray, &rec](const GeometricObject& obj) {
+        mObjectFactory.iterateProducts([&t, &tMin, ray, rec](const GeometricObject& obj) {
             if(obj.hit(ray, t, rec) && (t < tMin))
             {
                 tMin = t;
-                rec.hitAnObject = true;
-                rec.color = obj.getColor();
+                rec->hitAnObject = true;
+                rec->color = obj.getColor();
             }
         });
-
-        return rec.hitAnObject;
     }
 };
 

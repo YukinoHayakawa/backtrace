@@ -25,7 +25,7 @@ namespace backtrace {
 
 class Sampler
 {
-public: // TO-DO: Should be protected.
+protected:
     int mNumSamplesPerSet;
     int mNumSampleSets;
     std::vector<Point2d> mUnitSquaredSamples;
@@ -46,6 +46,8 @@ public:
 
     virtual void generateSamples() {}
 
+    int getSampleNumber() { return mNumSamplesPerSet; }
+    
     void setupShuffledIndices()
     {
 

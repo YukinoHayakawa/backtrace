@@ -37,19 +37,19 @@ public:
 
     virtual ~Sphere() {}
 
-    virtual bool hit(const Ray& ray, double& tmin, ShadeRecord& result) const;
+    virtual bool hit(Ray* ray, double& tmin, ShadeRecord* result) const;
 
 public: // TO-DO: Should be protected.
     Point3d mCenter;
     double mRadius;
 };
 
-bool Sphere::hit(const Ray& ray, double& tmin, ShadeRecord& result) const
+bool Sphere::hit(Ray* ray, double& tmin, ShadeRecord* result) const
 {
     double      t;
-    Vector3d    temp    = ray.origin - mCenter;
-    double      a       = ray.direction * ray.direction;
-    double      b       = 2.0 * temp * ray.direction;
+    Vector3d    temp    = ray->origin - mCenter;
+    double      a       = ray->direction * ray->direction;
+    double      b       = 2.0 * temp * ray->direction;
     double      c       = temp * temp - mRadius * mRadius;
     double      disc    = b * b - 4.0 * a * c;
     
@@ -66,8 +66,8 @@ bool Sphere::hit(const Ray& ray, double& tmin, ShadeRecord& result) const
         if (t > kEpsilon)
         {
             tmin = t;
-            result.normal = (temp + t * ray.direction) / mRadius;
-            result.localHitPoint = ray.origin + t * ray.direction;
+            result->normal = (temp + t * ray->direction) / mRadius;
+            result->localHitPoint = ray->origin + t * ray->direction;
             return true;
         } 
     
@@ -76,8 +76,8 @@ bool Sphere::hit(const Ray& ray, double& tmin, ShadeRecord& result) const
         if (t > kEpsilon)
         {
             tmin = t;
-            result.normal = (temp + t * ray.direction) / mRadius;
-            result.localHitPoint = ray.origin + t * ray.direction;
+            result->normal = (temp + t * ray->direction) / mRadius;
+            result->localHitPoint = ray->origin + t * ray->direction;
             return true;
         } 
     }
